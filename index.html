@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Secure Payment</title>
+  <script src="https://js.stripe.com/v3/"></script>
+  <style>
+    body { font-family: sans-serif; padding: 20px; }
+    #card-element { border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
+  </style>
+</head>
+<body>
+  <h2>Pay with Card</h2>
+  <form id="payment-form">
+    <div id="card-element"></div>
+    <button type="submit">Pay</button>
+  </form>
+  <div id="result"></div>
+
+  <script>
+    const stripe = Stripe('pk_test_xxx'); // 使用你自己的 Stripe 公钥
+    const elements = stripe.elements();
+    const card = elements.create('card');
+    card.mount('#card-element');
+
+    const form = document.getElementById('payment-form');
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const {paymentMethod, error} = await stripe.createPaymentMethod({
+        type: 'card',
+        card: card,
+      });
+      document.getElementById('result').textContent = error ? error.message : 'Payment method created: ' + paymentMethod.id;
+    });
+  </script>
+</body>
+</html>
