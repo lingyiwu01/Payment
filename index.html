@@ -1,20 +1,74 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh">
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Secure Payment</title>
   <script src="https://js.stripe.com/v3/"></script>
   <style>
     body { font-family: sans-serif; padding: 20px; }
+    .form-container { max-width: 600px; margin: auto; background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); }
+    .form-container h2 { text-align: center; margin-bottom: 20px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: bold; }
+    .form-group input { width: 100%; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; }
     #card-element { border: 1px solid #ccc; padding: 10px; border-radius: 4px; }
+    button { width: 100%; padding: 15px; font-size: 18px; background-color: #28a745; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background-color: #218838; }
+    #result { margin-top: 20px; text-align: center; }
   </style>
 </head>
 <body>
-  <h2>Pay with Card</h2>
-  <form id="payment-form">
-    <div id="card-element"></div>
-    <button type="submit">Pay</button>
-  </form>
-  <div id="result"></div>
+  <div class="form-container">
+    <h2>请输入您的支付信息</h2>
+    <form id="payment-form">
+      <!-- 持卡人姓名 -->
+      <div class="form-group">
+        <label for="cardholder">持卡人姓名</label>
+        <input type="text" id="cardholder" name="cardholder" required>
+      </div>
+
+      <!-- 卡号输入框 -->
+      <div class="form-group">
+        <label for="card-element">卡号</label>
+        <div id="card-element"></div>
+      </div>
+
+      <!-- 有效期 -->
+      <div class="form-group">
+        <label for="expiry">有效期 (MM/YY)</label>
+        <input type="text" id="expiry" name="expiry" placeholder="MM/YY" required>
+      </div>
+
+      <!-- CVV -->
+      <div class="form-group">
+        <label for="cvv">CVV</label>
+        <input type="text" id="cvv" name="cvv" maxlength="3" pattern="\d{3}" required>
+      </div>
+
+      <!-- 账单地址 -->
+      <div class="form-group">
+        <label for="billing-address">账单地址</label>
+        <input type="text" id="billing-address" name="billing-address">
+      </div>
+
+      <!-- 邮政编码 -->
+      <div class="form-group">
+        <label for="zip-code">邮政编码</label>
+        <input type="text" id="zip-code" name="zip-code">
+      </div>
+
+      <!-- 联系方式 -->
+      <div class="form-group">
+        <label for="contact">联系方式（电话或邮箱）</label>
+        <input type="text" id="contact" name="contact" required>
+      </div>
+
+      <!-- 提交按钮 -->
+      <button type="submit">提交支付</button>
+    </form>
+    <div id="result"></div>
+  </div>
 
   <script>
     const stripe = Stripe('pk_test_xxx'); // 使用你自己的 Stripe 公钥
@@ -25,12 +79,23 @@
     const form = document.getElementById('payment-form');
     form.addEventListener('submit', async (e) => {
       e.preventDefault();
+
       const {paymentMethod, error} = await stripe.createPaymentMethod({
         type: 'card',
         card: card,
       });
-      document.getElementById('result').textContent = error ? error.message : 'Payment method created: ' + paymentMethod.id;
+
+      // 处理支付错误
+      if (error) {
+        document.getElementById('result').textContent = error.message;
+      } else {
+        document.getElementById('result').textContent = '支付方式创建成功: ' + paymentMethod.id;
+
+        // 这里可以通过后端进一步处理支付
+        // 比如将 paymentMethod.id 和其他表单信息发送到服务器
+      }
     });
   </script>
 </body>
 </html>
+
